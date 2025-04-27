@@ -1,0 +1,62 @@
+services:
+  organization-db:
+    image: postgres:16
+    container_name: organization-db
+    environment:
+      POSTGRES_DB: organization_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - organization_data:/var/lib/postgresql/data
+      - ./organization-service/script:/docker-entrypoint-initdb.d
+
+  warehouse-db:
+    image: postgres:16
+    container_name: warehouse-db
+    environment:
+      POSTGRES_DB: warehouse_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - warehouse_data:/var/lib/postgresql/data
+      - ./warehouse-service/script:/docker-entrypoint-initdb.d
+
+  product-db:
+    image: postgres:16
+    container_name: product-db
+    environment:
+      POSTGRES_DB: product_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - product_data:/var/lib/postgresql/data
+      - ./product-service/script:/docker-entrypoint-initdb.d
+
+  employee-db:
+    image: postgres:16
+    container_name: employee-db
+    environment:
+      POSTGRES_DB: employee_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5436:5432"
+    volumes:
+      - employee_data:/var/lib/postgresql/data
+      - ./employee-service/script:/docker-entrypoint-initdb.d
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+volumes:
+  organization_data:
+  warehouse_data:
+  product_data:
+  employee_data:

@@ -1,0 +1,28 @@
+package by.bsuir.employeeservice.DTO;
+
+import lombok.*;
+
+import java.util.UUID;
+
+
+@Getter
+@Builder
+@Setter
+@RequiredArgsConstructor
+@AllArgsConstructor
+public class EmployeeDto {
+    private UUID id;
+    private String login;
+    private String encodedPassword;
+    private String title;
+    private String firstName;
+    private String secondName;
+    private Integer warehouseId;
+    private Integer organizationId;
+
+    public EmployeeDto(UUID id, String lowerCase, Integer organizationId) {
+        this.id = id;
+        this.login = lowerCase;
+        this.organizationId = organizationId;
+    }
+}
