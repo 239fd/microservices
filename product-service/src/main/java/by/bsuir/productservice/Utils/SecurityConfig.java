@@ -20,6 +20,7 @@ public class SecurityConfig {
         return http
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/product/by-cell-ids").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)

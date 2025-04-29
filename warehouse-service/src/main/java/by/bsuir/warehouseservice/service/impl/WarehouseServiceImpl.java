@@ -12,10 +12,12 @@ import by.bsuir.warehouseservice.service.WarehouseService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -294,21 +296,40 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Transactional
     public List<WarehouseDTO> findAllByUserLogin(String dirLogin) {
 
-        System.out.println("dirLogin: " + dirLogin);
         EmployeeDto emp = employeeClient.getEmployee(dirLogin).getData();
-        Integer orgId = emp.getOrganizationId();
-        System.out.println("orgId: " + orgId);
+        if (emp.getTitle().equalsIgnoreCase("director")) {
+            Integer orgId = emp.getOrganizationId();
 
-        List<Warehouse> warehouses = warehouseRepository.findAllByOrganizationId(orgId);
+            List<Warehouse> warehouses = warehouseRepository.findAllByOrganizationId(orgId);
 
-        return warehouses.stream()
-                .map(w -> {
-                    try {
-                        return getById(w.getId(), dirLogin);
-                    } catch (AccessDeniedException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
+            return warehouses.stream()
+                    .map(w -> {
+                        try {
+                            return getById(w.getId(), dirLogin);
+                        } catch (AccessDeniedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .collect(Collectors.toList());
+        }
+        List<Warehouse> single = warehouseRepository.findAllById(Collections.singleton(emp.getWarehouseId()));
+        List<Rack> racks = rackRepository.findAllByWarehouseId(emp.getWarehouseId());
+        List<Cell> cells = cellRepository.findAllByRackId(racks.get(0).getId());
+        List<RackDTO> rackDTOs = new ArrayList<>();
+        List<CellDTO> cellDTOs = new ArrayList<>();
+        for (Cell c : cells) {
+            cellDTOs.add(getCellDTO(c));
+        }
+        for (Rack r : racks) {
+            rackDTOs.add(getRackDTO(r));
+        }
+        WarehouseDTO dto = new WarehouseDTO();
+        dto.setId(single.get(0).getId());
+        dto.setName(single.get(0).getName());
+        dto.setAddress(single.get(0).getAddress());
+        dto.setOrganizationId(single.get(0).getOrganizationId());
+        dto.setRacks(rackDTOs);
+        return List.of(dto);
+
     }
 }

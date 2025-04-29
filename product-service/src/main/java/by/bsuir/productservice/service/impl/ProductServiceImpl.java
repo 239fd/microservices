@@ -52,6 +52,9 @@ public class ProductServiceImpl implements ProductService {
                         .map(cell -> new CellInfo(rack, cell)))
                 .sorted(Comparator.comparing((CellInfo ci) -> ci.cell.getId()))
                 .toList();
+        for (CellInfo cell : allCells) {
+            System.out.println(cell.toString());
+        }
         if (allCells.isEmpty()) {
             throw new AppException("No cells in warehouse", HttpStatus.CONFLICT);
         }
@@ -419,6 +422,29 @@ public class ProductServiceImpl implements ProductService {
         return result;
     }
 
+    @Override
+    public List<ProductDTO> getProductsByCellIds(List<Integer> cellIds) {
+        List<CellHasProduct> links = cellHasProductRepository.findAllByIdCellIdIn(cellIds);
+
+        Map<Integer, Integer> productToCellMap = links.stream()
+                .collect(Collectors.toMap(
+                        link -> link.getId().getProductId(),
+                        link -> link.getId().getCellId(),
+                        (existing, replacement) -> existing
+                ));
+
+        List<Product> products = productRepository.findAllById(productToCellMap.keySet());
+
+        return products.stream().map(product -> {
+            ProductDTO dto = new ProductDTO();
+            dto.setId(product.getId());
+            dto.setName(product.getName());
+            dto.setAmount(product.getAmount());
+            dto.setPrice(product.getPrice());
+            dto.setBestBeforeDate(product.getBestBeforeDate());
+            return dto;
+        }).collect(Collectors.toList());
+    }
     private void removeIfZero(Integer productId) {
         productRepository.findById(productId).ifPresent(prod -> {
             if (prod.getAmount() == 0) {

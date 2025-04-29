@@ -27,4 +27,6 @@ public interface ProductService {
     List<ProductDTO> searchProducts(String query);
 
     List<ProductDTO> getAllStoredProducts(Principal principal);
+
+    List<ProductDTO> getProductsByCellIds(List<Integer> cellIds);
 }

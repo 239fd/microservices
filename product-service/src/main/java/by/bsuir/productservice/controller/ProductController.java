@@ -2,6 +2,7 @@ package by.bsuir.productservice.controller;
 
 import by.bsuir.productservice.DTO.*;
 import by.bsuir.productservice.service.ProductService;
+import jakarta.annotation.security.PermitAll;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -116,6 +117,11 @@ public class ProductController {
             @RequestParam("query") String query) {
         List<ProductDTO> result = productService.searchProducts(query);
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/by-cell-ids")
+    public List<ProductDTO> getProductsByCellIds(@RequestBody List<Integer> cellIds) {
+        return productService.getProductsByCellIds(cellIds);
     }
     private byte[] zipDocuments(Map<String, byte[]> docs) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();

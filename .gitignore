@@ -3,8 +3,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-./auth-service/src/main/resources/
-
+auth-service/src/main/resources/application.properties
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

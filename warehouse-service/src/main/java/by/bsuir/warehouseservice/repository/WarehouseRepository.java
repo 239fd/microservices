@@ -11,4 +11,6 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, Integer> {
     List<Warehouse> findByOrganizationId(Integer organizationId);
     void deleteByOrganizationId(Integer organizationId);
     List<Warehouse> findAllByOrganizationId(Integer organizationId);
+
+    Warehouse getWarehouseById(int id);
 }
