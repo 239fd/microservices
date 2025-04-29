@@ -29,6 +29,190 @@ public class WarehouseServiceImpl implements WarehouseService {
     private final EmployeeClient employeeClient;
 
     @Override
+    @Transactional
+    public WarehouseDTO createWarehouse(CreateWarehouseRequest request, String dirLogin) throws AccessDeniedException {
+        checkDirectorOrg(request.getOrganizationId(), dirLogin);
+
+        Warehouse w = Warehouse.builder()
+                .name(request.getName())
+                .address(request.getAddress())
+                .organizationId(request.getOrganizationId())
+                .build();
+        warehouseRepository.save(w);
+
+        if (request.getRacks() != null) {
+            for (CreateRackRequest r : request.getRacks()) {
+                Rack rack = Rack.builder()
+                        .capacity(r.getCapacity())
+                        .warehouseId(w.getId())
+                        .build();
+                rackRepository.save(rack);
+
+                if (r.getCells() != null) {
+                    for (CreateCellRequest c : r.getCells()) {
+                        Cell cell = Cell.builder()
+                                .length(c.getLength())
+                                .width(c.getWidth())
+                                .height(c.getHeight())
+                                .rackId(rack.getId())
+                                .build();
+                        cellRepository.save(cell);
+                    }
+                }
+            }
+        }
+
+        return getById(w.getId(), dirLogin);
+    }
+
+    @Override
+    @Transactional
+    public WarehouseDTO updateWarehouse(Integer id, UpdateWarehouseRequest request, String dirLogin) throws AccessDeniedException {
+        Warehouse warehouse = warehouseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Warehouse not found"));
+
+        checkDirectorOrg(warehouse.getOrganizationId(), dirLogin);
+
+        warehouse.setName(request.getName());
+        warehouse.setAddress(request.getAddress());
+        warehouseRepository.save(warehouse);
+
+        return getById(id, dirLogin);
+    }
+
+    @Override
+    @Transactional
+    public void deleteWarehouse(Integer id, String dirLogin) throws AccessDeniedException {
+        Warehouse warehouse = warehouseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Warehouse not found"));
+        checkDirectorOrg(warehouse.getOrganizationId(), dirLogin);
+
+        List<Rack> racks = rackRepository.findByWarehouseId(id);
+        for (Rack r : racks) {
+            cellRepository.deleteByRackId(r.getId());
+        }
+        rackRepository.deleteByWarehouseId(id);
+        warehouseRepository.deleteById(id);
+    }
+
+
+    @Override
+    @Transactional
+    public RackDTO createRack(Integer warehouseId, CreateRackRequest request, String dirLogin) {
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
+                .orElseThrow(() -> new EntityNotFoundException("Warehouse not found"));
+        try {
+            checkDirectorOrg(warehouse.getOrganizationId(), dirLogin);
+        } catch (AccessDeniedException e) {
+            throw new RuntimeException(e);
+        }
+
+        Rack rack = Rack.builder()
+                .capacity(request.getCapacity())
+                .warehouseId(warehouseId)
+                .build();
+        rackRepository.save(rack);
+
+        if (request.getCells() != null) {
+            for (CreateCellRequest cell : request.getCells()) {
+                Cell c = Cell.builder()
+                        .length(cell.getLength())
+                        .width(cell.getWidth())
+                        .height(cell.getHeight())
+                        .rackId(rack.getId())
+                        .build();
+                cellRepository.save(c);
+            }
+        }
+
+        return getRackDTO(rack);
+    }
+
+    @Override
+    @Transactional
+    public RackDTO updateRack(Integer warehouseId, Integer rackId, UpdateRackRequest request, String dirLogin) {
+        Rack rack = rackRepository.findById(rackId)
+                .orElseThrow(() -> new EntityNotFoundException("Rack not found"));
+        try {
+            checkDirectorOrg(warehouseRepository.findById(warehouseId)
+                    .orElseThrow().getOrganizationId(), dirLogin);
+        } catch (AccessDeniedException e) {
+            throw new RuntimeException(e);
+        }
+
+        rack.setCapacity(request.getCapacity());
+        rackRepository.save(rack);
+        return getRackDTO(rack);
+    }
+
+    @Override
+    @Transactional
+    public CellDTO createCell(Integer warehouseId, Integer rackId, CreateCellRequest request, String dirLogin) {
+        try {
+            checkDirectorOrg(warehouseRepository.findById(warehouseId)
+                    .orElseThrow().getOrganizationId(), dirLogin);
+        } catch (AccessDeniedException e) {
+            throw new RuntimeException(e);
+        }
+
+        Cell cell = Cell.builder()
+                .length(request.getLength())
+                .width(request.getWidth())
+                .height(request.getHeight())
+                .rackId(rackId)
+                .build();
+        cellRepository.save(cell);
+        return getCellDTO(cell);
+    }
+
+    @Override
+    @Transactional
+    public CellDTO updateCell(Integer warehouseId, Integer rackId, Integer cellId, UpdateCellRequest request, String dirLogin) {
+        try {
+            checkDirectorOrg(warehouseRepository.findById(warehouseId)
+                    .orElseThrow().getOrganizationId(), dirLogin);
+        } catch (AccessDeniedException e) {
+            throw new RuntimeException(e);
+        }
+
+        Cell cell = cellRepository.findById(cellId)
+                .orElseThrow(() -> new EntityNotFoundException("Cell not found"));
+
+        cell.setLength(request.getLength());
+        cell.setWidth(request.getWidth());
+        cell.setHeight(request.getHeight());
+        cellRepository.save(cell);
+        return getCellDTO(cell);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCell(Integer warehouseId, Integer rackId, Integer cellId, String dirLogin) {
+        try {
+            checkDirectorOrg(warehouseRepository.findById(warehouseId)
+                    .orElseThrow().getOrganizationId(), dirLogin);
+        } catch (AccessDeniedException e) {
+            throw new RuntimeException(e);
+        }
+        cellRepository.deleteById(cellId);
+    }
+
+
+    @Override
+    @Transactional
+    public void deleteRack(Integer warehouseId, Integer rackId, String dirLogin) {
+        try {
+            checkDirectorOrg(warehouseRepository.findById(warehouseId)
+                    .orElseThrow().getOrganizationId(), dirLogin);
+        } catch (AccessDeniedException e) {
+            throw new RuntimeException(e);
+        }
+
+        cellRepository.deleteByRackId(rackId);
+        rackRepository.deleteById(rackId);
+    }
+
+    @Override
     public boolean findById(int id) {
         return warehouseRepository.findById(id).isPresent();
     }
@@ -48,65 +232,10 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     private void checkDirectorOrg(Integer orgId, String login) throws AccessDeniedException {
-        EmployeeDto emp = employeeClient.getEmployee(login);
+        EmployeeDto emp = employeeClient.getEmployee(login).getData();
         if (!emp.getOrganizationId().equals(orgId)) {
             throw new AccessDeniedException("Only director of this organization");
         }
-    }
-
-    @Override
-    public WarehouseDTO create(CreateWarehouseRequest request, String dirLogin) throws AccessDeniedException {
-        checkDirectorOrg(request.getOrganizationId(), dirLogin);
-        Warehouse w = Warehouse.builder()
-                .name(request.getName())
-                .address(request.getAddress())
-                .organizationId(request.getOrganizationId())
-                .build();
-        warehouseRepository.save(w);
-        for (int i = 0; i < request.getRackCount(); i++) {
-            Rack r = Rack.builder()
-                    .capacity(request.getRackCapacity())
-                    .warehouseId(w.getId())
-                    .build();
-            rackRepository.save(r);
-            for (int j = 0; j < request.getCellsPerRack(); j++) {
-                Cell c = Cell.builder()
-                        .length(request.getCellLength())
-                        .width(request.getCellWidth())
-                        .height(request.getCellHeight())
-                        .rackId(r.getId())
-                        .build();
-                cellRepository.save(c);
-            }
-        }
-        return getById(w.getId(), dirLogin);
-    }
-
-    @Override
-    public WarehouseDTO update(Integer id, UpdateWarehouseRequest request, String dirLogin) throws AccessDeniedException {
-        Warehouse w = warehouseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Warehouse not found"));
-        checkDirectorOrg(w.getOrganizationId(), dirLogin);
-        w.setName(request.getName());
-        w.setAddress(request.getAddress());
-        warehouseRepository.save(w);
-        return getById(id, dirLogin);
-    }
-
-    @Override
-    @Transactional
-    public void delete(Integer id, String dirLogin) throws AccessDeniedException {
-        Warehouse w = warehouseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Warehouse not found"));
-        checkDirectorOrg(w.getOrganizationId(), dirLogin);
-
-        employeeClient.unassignWarehouseByWarehouseId(id);
-
-        rackRepository.findAllByWarehouseId(id).forEach(r -> {
-            cellRepository.deleteAllByRackId(r.getId());
-        });
-        rackRepository.deleteAllByWarehouseId(id);
-        warehouseRepository.delete(w);
     }
 
     @Override
@@ -142,12 +271,31 @@ public class WarehouseServiceImpl implements WarehouseService {
         return dto;
     }
 
+    private RackDTO getRackDTO(Rack rack) {
+        List<CellDTO> cells = cellRepository.findAllByRackId(rack.getId()).stream().map(this::getCellDTO).toList();
+        return RackDTO.builder()
+                .id(rack.getId())
+                .capacity(rack.getCapacity())
+                .cells(cells)
+                .build();
+    }
+
+    private CellDTO getCellDTO(Cell cell) {
+        return CellDTO.builder()
+                .id(cell.getId())
+                .length(cell.getLength())
+                .width(cell.getWidth())
+                .height(cell.getHeight())
+                .build();
+    }
+
+
     @Override
     @Transactional
     public List<WarehouseDTO> findAllByUserLogin(String dirLogin) {
 
         System.out.println("dirLogin: " + dirLogin);
-        EmployeeDto emp = employeeClient.getEmployee(dirLogin);
+        EmployeeDto emp = employeeClient.getEmployee(dirLogin).getData();
         Integer orgId = emp.getOrganizationId();
         System.out.println("orgId: " + orgId);
 

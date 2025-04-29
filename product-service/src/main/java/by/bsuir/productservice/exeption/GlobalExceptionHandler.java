@@ -1,32 +1,34 @@
-package by.bsuir.authservice.exception;
+package by.bsuir.productservice.exeption;
 
-import by.bsuir.authservice.DTO.ApiResponse;
+import by.bsuir.productservice.DTO.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Collections;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ApiResponse<Object>> handleAppException(AppException ex) {
-        ApiResponse<Object> resp = ApiResponse.builder()
-                .data(null)
+        ApiResponse<Object> response = ApiResponse.builder()
+                .data(Collections.emptyList())
                 .status(false)
                 .message(ex.getMessage())
                 .build();
-        return new ResponseEntity<>(resp, ex.getCode());
-    }
 
+        return new ResponseEntity<>(response, ex.getCode());
+    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleAllExceptions(Exception ex) {
-        ApiResponse<Object> resp = ApiResponse.builder()
-                .data(null)
+        ApiResponse<Object> response = ApiResponse.builder()
+                .data(Collections.emptyList())
                 .status(false)
                 .message("An error occurred: " + ex.getMessage())
                 .build();
-        return ResponseEntity
-                .status(500)
-                .body(resp);
+
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

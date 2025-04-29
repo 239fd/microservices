@@ -43,7 +43,7 @@ public class OrganizationController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ROLE_DIRECTOR')")
+    @PreAuthorize("hasAuthority('director')")
     public ResponseEntity<OrganizationResponse> create(@RequestBody CreateOrganizationRequest request,
                                                        Principal principal) {
         String dirLogin = principal.getName();

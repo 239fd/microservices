@@ -14,5 +14,8 @@ public interface CellHasProductRepository extends JpaRepository<CellHasProduct, 
     List<CellHasProduct> findAllByCellId(@Param("cellId") Integer cellId);
 
     List<CellHasProduct> findAllByIdProductId(Integer productId);
+
+    List<CellHasProduct> findAllByIdCellIdIn(List<Integer> cellIds);
+
 }
 

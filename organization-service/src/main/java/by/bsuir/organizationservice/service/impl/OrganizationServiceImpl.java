@@ -34,7 +34,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationResponse create(CreateOrganizationRequest request, String dirLogin) {
-        EmployeeDto director = employeeClient.getByLogin(dirLogin);
+
+        EmployeeDto director = employeeClient.getByLogin(dirLogin).getData();
+
         if (!"director".equalsIgnoreCase(director.getTitle())) {
             throw new SecurityException("Only a director can create an organization");
         }
@@ -58,7 +60,7 @@ public class OrganizationServiceImpl implements OrganizationService {
              throw new  IllegalArgumentException("Organization not found");
         }
 
-        EmployeeDto director = employeeClient.getByLogin(dirLogin);
+        EmployeeDto director = employeeClient.getByLogin(dirLogin).getData();
 
         int orgIdOfDirector = director.getOrganizationId();
         if (!(orgIdOfDirector == org.getId()))  {
@@ -78,7 +80,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw new  IllegalArgumentException("Organization not found");
         }
 
-        EmployeeDto director = employeeClient.getByLogin(dirLogin);
+        EmployeeDto director = employeeClient.getByLogin(dirLogin).getData();
 
         int orgIdOfDirector = director.getOrganizationId();
         if (!(orgIdOfDirector == org.getId()))  {
@@ -94,7 +96,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationDTO findInfoByUserLogin(String username) {
         EmployeeDto employee;
         try {
-            employee = employeeClient.getByLogin(username);
+            employee = employeeClient.getByLogin(username).getData();
         } catch (FeignException e) {
             throw new EntityNotFoundException("Employee not found by login: " + username);
         }

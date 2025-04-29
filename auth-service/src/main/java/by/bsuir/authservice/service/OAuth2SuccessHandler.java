@@ -117,7 +117,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private EmployeeDto getEmployeeIfExists(String login) {
         try {
-            return employeeClient.getByLogin(login);
+            return employeeClient.getByLogin(login).getData();
         } catch (Exception e) {
             return null;
         }

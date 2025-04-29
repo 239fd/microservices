@@ -40,7 +40,7 @@ public class AuthService {
 
     public JwtResponse login(LoginRequest request) {
 
-        EmployeeDto employee = employeeClient.getByLogin(request.getLogin());
+        EmployeeDto employee = employeeClient.getByLogin(request.getLogin()).getData();
 
         if (employee == null || !passwordEncoder.matches(request.getPassword(), employee.getEncodedPassword())) {
             throw new BadCredentialsException("Неверный логин или пароль");
@@ -89,7 +89,7 @@ public class AuthService {
 
     public JwtResponse register(RegisterRequest request) {
 
-        if (employeeClient.existsByLogin(request.getLogin())) {
+        if (employeeClient.existsByLogin(request.getLogin()).getData()) {
             throw new AppException("User already exists", HttpStatus.CONFLICT);
         }
 
@@ -157,7 +157,6 @@ public class AuthService {
 
         return new JwtResponse(accessToken, refreshToken);
     }
-
 
     public JwtResponse completeOAuthRegistration(RegisterRequest request) {
         String redisKey = "oauth-temp:" + request.getLogin();

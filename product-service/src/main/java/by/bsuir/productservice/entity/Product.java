@@ -1,5 +1,6 @@
 package by.bsuir.productservice.entity;
 
+import by.bsuir.productservice.DTO.ProductDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -51,5 +52,4 @@ public class Product {
 
     @Column(name = "bestbeforedate")
     private LocalDate bestBeforeDate;
-
 }

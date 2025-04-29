@@ -1,7 +1,6 @@
 package by.bsuir.productservice.controller;
 
-import by.bsuir.productservice.DTO.DispatchDTO;
-import by.bsuir.productservice.DTO.ProductDTO;
+import by.bsuir.productservice.DTO.*;
 import by.bsuir.productservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -64,6 +63,60 @@ public class ProductController {
                 .body(zipBytes);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<ProductDTO>> getAllProducts(Principal principal) throws Exception {
+        return ResponseEntity.ok(productService.getAllStoredProducts(principal));
+    }
+
+    @PostMapping("/inventory")
+    @PreAuthorize("hasAuthority('ROLE_ACCOUNTANT')")
+    public ResponseEntity<byte[]> performInventory(
+            @RequestBody InventoryDTO dto,
+            Principal principal) throws Exception {
+
+        byte[] pdf = productService.performInventoryCheck(dto, principal);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"receipt_order.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(pdf.length)
+                .body(pdf);
+    }
+    @PostMapping("/revaluation")
+    @PreAuthorize("hasAuthority('ROLE_ACCOUNTANT')")
+    public ResponseEntity<byte[]> revaluateProduct(
+            @RequestBody RevaluateDTO dto,
+            Principal principal) throws Exception {
+
+        byte[] pdf = productService.revaluateProducts(dto, principal);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"receipt_order.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(pdf.length)
+                .body(pdf);
+    }
+    @PostMapping("/writeoff")
+    @PreAuthorize("hasAuthority('ROLE_ACCOUNTANT')")
+    public ResponseEntity<byte[]> writeoffProduct(
+            @RequestBody WriteOffDTO dto,
+            Principal principal) throws Exception {
+
+        byte[] pdf = productService.writeOff(dto, principal);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"receipt_order.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(pdf.length)
+                .body(pdf);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductDTO>> searchProducts(
+            @RequestParam("query") String query) {
+        List<ProductDTO> result = productService.searchProducts(query);
+        return ResponseEntity.ok(result);
+    }
     private byte[] zipDocuments(Map<String, byte[]> docs) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ZipOutputStream zos = new ZipOutputStream(baos)) {

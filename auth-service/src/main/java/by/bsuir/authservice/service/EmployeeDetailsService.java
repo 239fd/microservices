@@ -19,7 +19,7 @@ public class EmployeeDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
         EmployeeDto employee;
         try {
-            employee = employeeClient.getByLogin(login);
+            employee = employeeClient.getByLogin(login).getData();
         } catch (Exception e) {
             throw new UsernameNotFoundException("Not found: " + login);
         }
