@@ -1,15 +1,74 @@
-services:
+version: "3.8"
 
+services:
   grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
+    image: grafana/grafana
     ports:
-      - "3000:3000"
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      - 3500:3500
     volumes:
-      - grafana_data:/var/lib/grafana
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      monitoring:
+        aliases:
+          - grafana
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus:/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      monitoring:
+        aliases:
+          - prometheus
+
+  # Eureka Server
+  eureka-server:
+    build: ./eureka-server
+    ports:
+      - "8761:8761"
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8765:8765"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - redis
+
+  # Organization Service + Postgres
+  organization-service:
+    build: ./organization-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://organization-db:5432/organization_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - organization-db
 
   organization-db:
     image: postgres:16
@@ -24,6 +83,47 @@ services:
       - organization_data:/var/lib/postgresql/data
       - ./organization-service/script:/docker-entrypoint-initdb.d
 
+  # Employee Service + Postgres
+  employee-service:
+    build: ./employee-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://employee-db:5432/employee_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - employee-db
+
+  employee-db:
+    image: postgres:16
+    container_name: employee-db
+    environment:
+      POSTGRES_DB: employee_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5436:5432"
+    volumes:
+      - employee_data:/var/lib/postgresql/data
+      - ./employee-service/script:/docker-entrypoint-initdb.d
+
+  # Warehouse Service + Postgres
+  warehouse-service:
+    build: ./warehouse-service
+    ports:
+      - "8088:8088"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://warehouse-db:5432/warehouse_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - warehouse-db
+
   warehouse-db:
     image: postgres:16
     container_name: warehouse-db
@@ -36,6 +136,20 @@ services:
     volumes:
       - warehouse_data:/var/lib/postgresql/data
       - ./warehouse-service/script:/docker-entrypoint-initdb.d
+
+  # Product Service + Postgres
+  product-service:
+    build: ./product-service
+    ports:
+      - "8087:8087"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://product-db:5432/product_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - product-db
 
   product-db:
     image: postgres:16
@@ -50,26 +164,24 @@ services:
       - product_data:/var/lib/postgresql/data
       - ./product-service/script:/docker-entrypoint-initdb.d
 
-  employee-db:
-    image: postgres:16
-    container_name: employee-db
-    environment:
-      POSTGRES_DB: employee_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5436:5432"
-    volumes:
-      - employee_data:/var/lib/postgresql/data
-      - ./employee-service/script:/docker-entrypoint-initdb.d
+  # Redis (для auth-service, кэширования, и т.д.)
   redis:
     image: redis:7
     container_name: redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
 volumes:
   organization_data:
   warehouse_data:
   product_data:
   employee_data:
   grafana_data:
+
+networks:
+  monitoring:
