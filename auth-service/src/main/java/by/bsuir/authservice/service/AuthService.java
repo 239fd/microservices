@@ -38,7 +38,7 @@ public class AuthService {
     @Value("${jwt.refresh.expiration-ms}")
     private long refreshExpirationMs;
 
-    public JwtResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
 
         EmployeeDto employee = employeeClient.getByLogin(request.getLogin()).getData();
 
@@ -58,7 +58,13 @@ public class AuthService {
         String refreshToken = jwtUtil.generateRefreshToken(auth);
 
         redisTemplate.opsForValue().set(refreshToken, auth.getName(), refreshExpirationMs, TimeUnit.MILLISECONDS);
-        return new JwtResponse(accessToken, refreshToken);
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setAccessToken(accessToken);
+        loginResponse.setRefreshToken(refreshToken);
+        loginResponse.setUser(employee);
+
+        return loginResponse;
     }
 
     public JwtResponse refreshToken(String refreshToken) {

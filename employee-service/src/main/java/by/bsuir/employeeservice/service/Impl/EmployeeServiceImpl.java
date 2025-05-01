@@ -9,6 +9,7 @@ import by.bsuir.employeeservice.feign.OrganizationClient;
 import by.bsuir.employeeservice.feign.WarehouseClient;
 import by.bsuir.employeeservice.repository.EmployeeRepository;
 import by.bsuir.employeeservice.service.EmployeeService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -85,6 +86,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional
     public void deleteByOrganization(Integer organizationId) {
         employeeRepository.deleteByOrganizationId(organizationId);
     }

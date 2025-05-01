@@ -87,8 +87,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw new IllegalStateException("Only the director of this organization can update it");
         }
 
-        warehouseClient.deleteByOrganization(id);
-        employeeClient.deleteByOrganization(id);
+        warehouseClient.deleteByOrganization(org.getId());
+        employeeClient.deleteByOrganization(org.getId());
         organizationRepository.delete(org);
     }
 

@@ -1,7 +1,6 @@
 package by.bsuir.organizationservice.controller;
 
 import by.bsuir.organizationservice.DTO.*;
-import by.bsuir.organizationservice.entity.Organization;
 import by.bsuir.organizationservice.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -9,12 +8,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/organization")
 @RequiredArgsConstructor
-@CrossOrigin(maxAge = 3600L)
 public class OrganizationController {
 
     private final OrganizationService organizationService;

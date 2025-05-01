@@ -68,7 +68,7 @@ class WarehouseServiceImplTest {
         // mock employee
         when(employeeClient.getEmployee("dir"))
                 .thenReturn(new ResponseDTO<>(director));
-        // mock save behavior: при сохранении склада задаём id=1
+
         doAnswer(invocation -> {
             Warehouse w = invocation.getArgument(0);
             ReflectionTestUtils.setField(w, "id", 1);

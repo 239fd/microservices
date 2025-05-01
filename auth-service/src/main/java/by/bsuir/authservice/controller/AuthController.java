@@ -25,15 +25,14 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@CrossOrigin(maxAge = 3600L)
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<JwtResponse>> login(@RequestBody LoginRequest request) {
-        JwtResponse tokens = authService.login(request);
-        ApiResponse<JwtResponse> responseBody = ApiResponse.<JwtResponse>builder()
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest request) {
+        LoginResponse tokens = authService.login(request);
+        ApiResponse<LoginResponse> responseBody = ApiResponse.<LoginResponse>builder()
                 .status(true)
                 .message("Logged in")
                 .data(tokens)

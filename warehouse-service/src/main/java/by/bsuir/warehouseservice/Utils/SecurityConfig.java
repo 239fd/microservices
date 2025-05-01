@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/warehouse/by-id").permitAll()
                         .requestMatchers("/api/warehouse/by-user").permitAll()
+                        .requestMatchers("/api/warehouse/by-organization/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)

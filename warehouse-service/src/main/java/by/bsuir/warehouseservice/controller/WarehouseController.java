@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/warehouse")
-@CrossOrigin(maxAge = 3600L)
 public class WarehouseController {
 
     private final WarehouseService warehouseService;

@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/statistics")
 @RequiredArgsConstructor
-@CrossOrigin(maxAge = 3600L)
 public class StatisticsController {
 
     private final StatisticsService statisticsService;

@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "warehouse-service")
 public interface WarehouseClient {
-    @DeleteMapping("/api/warehouses/by-organization/{orgId}")
-    void deleteByOrganization(@PathVariable("orgId") Integer organizationId);
+    @DeleteMapping("/api/warehouse/by-organization/{orgId}")
+    void deleteByOrganization(@PathVariable("orgId") Integer orgId);
 }

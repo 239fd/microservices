@@ -223,6 +223,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Transactional
     public void deleteByOrganization(Integer organizationId) {
         List<Warehouse> list = warehouseRepository.findByOrganizationId(organizationId);
+        System.out.println(list.size());
         for (Warehouse w : list) {
             List<Rack> racks = rackRepository.findByWarehouseId(w.getId());
             for (Rack r : racks) {
