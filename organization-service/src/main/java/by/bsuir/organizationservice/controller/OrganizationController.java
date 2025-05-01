@@ -14,6 +14,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/organization")
 @RequiredArgsConstructor
+@CrossOrigin(maxAge = 3600L)
 public class OrganizationController {
 
     private final OrganizationService organizationService;

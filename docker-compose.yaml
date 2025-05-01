@@ -29,13 +29,11 @@ services:
         aliases:
           - prometheus
 
-  # Eureka Server
   eureka-server:
     build: ./eureka-server
     ports:
       - "8761:8761"
 
-  # API Gateway
   api-gateway:
     build: ./api-gateway
     ports:
@@ -56,7 +54,6 @@ services:
     depends_on:
       - redis
 
-  # Organization Service + Postgres
   organization-service:
     build: ./organization-service
     ports:
@@ -83,7 +80,6 @@ services:
       - organization_data:/var/lib/postgresql/data
       - ./organization-service/script:/docker-entrypoint-initdb.d
 
-  # Employee Service + Postgres
   employee-service:
     build: ./employee-service
     ports:
@@ -110,7 +106,6 @@ services:
       - employee_data:/var/lib/postgresql/data
       - ./employee-service/script:/docker-entrypoint-initdb.d
 
-  # Warehouse Service + Postgres
   warehouse-service:
     build: ./warehouse-service
     ports:
@@ -137,7 +132,6 @@ services:
       - warehouse_data:/var/lib/postgresql/data
       - ./warehouse-service/script:/docker-entrypoint-initdb.d
 
-  # Product Service + Postgres
   product-service:
     build: ./product-service
     ports:
@@ -164,7 +158,6 @@ services:
       - product_data:/var/lib/postgresql/data
       - ./product-service/script:/docker-entrypoint-initdb.d
 
-  # Redis (для auth-service, кэширования, и т.д.)
   redis:
     image: redis:7
     container_name: redis

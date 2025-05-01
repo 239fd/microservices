@@ -19,6 +19,7 @@ import java.util.zip.ZipOutputStream;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/product")
+@CrossOrigin(maxAge = 3600L)
 public class ProductController {
 
     private final ProductService productService;
