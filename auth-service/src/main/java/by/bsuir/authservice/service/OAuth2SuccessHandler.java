@@ -1,9 +1,6 @@
 package by.bsuir.authservice.service;
 
-import by.bsuir.authservice.DTO.ApiResponse;
-import by.bsuir.authservice.DTO.EmployeeDto;
-import by.bsuir.authservice.DTO.JwtResponse;
-import by.bsuir.authservice.DTO.TemporaryOAuthUser;
+import by.bsuir.authservice.DTO.*;
 import by.bsuir.authservice.feign.EmployeeClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -77,6 +74,14 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             );
             Authentication tempAuth = new UsernamePasswordAuthenticationToken(tempDetails, null, tempDetails.getAuthorities());
             String accessToken = jwtUtil.generateAccessToken(tempAuth);
+
+            RegisterRequest createReq = new RegisterRequest();
+            createReq.setLogin(email);
+            createReq.setFirstName(firstName);
+            createReq.setSecondName(lastName);
+            createReq.setTitle("director");
+
+            employeeClient.createDirector(createReq);
 
             Map<String, Object> body = new HashMap<>();
             body.put("status", true);

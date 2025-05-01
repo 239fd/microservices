@@ -41,6 +41,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional
     public void create(RegisterRequest dto) {
 
         OrganizationSearchDTO organizationSearchDTO = new OrganizationSearchDTO();
