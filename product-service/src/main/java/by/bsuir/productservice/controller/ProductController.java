@@ -25,27 +25,19 @@ public class ProductController {
 
     @PostMapping("/accept")
     @PreAuthorize("hasAuthority('ROLE_WORKER')")
-    public ResponseEntity<byte[]> acceptProduct(@RequestBody List<ProductDTO> products, Principal principal) throws Exception {
-        byte[] pdf = productService.acceptProduct(products, principal);
+    public ResponseEntity<byte[]> acceptProduct(@RequestBody List<ProductDTO> products,
+                                                Principal principal) throws Exception {
+
+        byte[] zip = productService.acceptProductWithBarcodes(products, principal);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"receipt_order.pdf\"")
-                .contentType(MediaType.APPLICATION_PDF)
-                .contentLength(pdf.length)
-                .body(pdf);
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"acceptance_package.zip\"")
+                .contentType(MediaType.parseMediaType("application/zip"))
+                .contentLength(zip.length)
+                .body(zip);
     }
 
-    @GetMapping("/barcode")
-    @PreAuthorize("hasAuthority('ROLE_WORKER')")
-    public ResponseEntity<byte[]> getBarcode(@RequestParam int productId) throws Exception {
-        byte[] pdf = productService.generateBarcode(productId);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"receipt_order.pdf\"")
-                .contentType(MediaType.APPLICATION_PDF)
-                .contentLength(pdf.length)
-                .body(pdf);
-    }
 
     @PostMapping("/dispatch")
     @PreAuthorize("hasAuthority('ROLE_WORKER')")

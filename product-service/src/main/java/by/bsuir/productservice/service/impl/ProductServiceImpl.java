@@ -18,11 +18,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +39,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public byte[] acceptProduct(List<ProductDTO> products, Principal principal) throws Exception {
+    public byte[] acceptProductWithBarcodes(List<ProductDTO> products, Principal principal) throws Exception {
         WarehouseDTO warehouse = warehouseClient.getByUser(principal.getName())
                 .stream().findFirst()
                 .orElseThrow(() -> new AppException("Warehouse not found", HttpStatus.NOT_FOUND));
@@ -103,7 +106,34 @@ public class ProductServiceImpl implements ProductService {
             System.out.println(ean);
             idToEan.put(product.getId(), ean);
         }
-        return pdfService.generateReceiptOrderPDF(products, savedIds, idToEan, getFullName(principal.getName()));
+        byte[] orderPdf = pdfService.generateReceiptOrderPDF(products, savedIds, idToEan, getFullName(principal.getName()));
+
+        record BarcodeFile(int productId, byte[] pdf) {
+        }
+        List<BarcodeFile> barcodes = new ArrayList<>();
+
+        for (Map.Entry<Integer, String> e : idToEan.entrySet()) {
+            byte[] codePdf = pdfService.generateBarcodePDF(e.getValue());
+            barcodes.add(new BarcodeFile(e.getKey(), codePdf));
+        }
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ZipOutputStream zos = new ZipOutputStream(baos)) {
+
+            zos.putNextEntry(new ZipEntry("receipt_order.pdf"));
+            zos.write(orderPdf);
+            zos.closeEntry();
+
+            for (BarcodeFile bf : barcodes) {
+                String name = "barcode_" + bf.productId() + ".pdf";
+                zos.putNextEntry(new ZipEntry(name));
+                zos.write(bf.pdf());
+                zos.closeEntry();
+            }
+            zos.finish();
+            return baos.toByteArray();
+        }
+
     }
 
     @Override
@@ -194,18 +224,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public byte[] generateBarcode(int productId) throws Exception {
-
-        List<CellHasProduct> products = cellHasProductRepository.findAllByIdProductId(productId);
-
-        if (products.isEmpty()) {
-            throw new AppException("No barcode found for product with ID: " + productId, HttpStatus.NOT_FOUND);
-        }
-
-        String ean = products.get(0).getBarcodePdf();
-        return pdfService.generateBarcodePDF(ean);
-    }
-    @Override
     @Transactional
     public byte[] performInventoryCheck(InventoryDTO dto, Principal principal) throws DocumentException, IOException {
 
@@ -247,7 +265,7 @@ public class ProductServiceImpl implements ProductService {
             expected.add(oldQty);
             actual.add(newQty);
             Product prod = productRepository.findById(id)
-                    .orElseThrow(() -> new AppException( "Product not found: " + id, HttpStatus.NOT_FOUND));
+                    .orElseThrow(() -> new AppException("Product not found: " + id, HttpStatus.NOT_FOUND));
             prod.setAmount(newQty);
             productRepository.save(prod);
             removeIfZero(pDto.getId());
@@ -445,6 +463,7 @@ public class ProductServiceImpl implements ProductService {
             return dto;
         }).collect(Collectors.toList());
     }
+
     private void removeIfZero(Integer productId) {
         productRepository.findById(productId).ifPresent(prod -> {
             if (prod.getAmount() == 0) {

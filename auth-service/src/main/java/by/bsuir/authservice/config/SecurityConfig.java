@@ -43,7 +43,12 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register", "/auth/refresh", "/auth/logout", "/auth/oauth2/**", "/oauth2/**", "/login/**", "/auth-service/oauth2/authorization/google", "/auth-service/oauth2/authorization/yandex").permitAll()
+                        .requestMatchers(
+                                "/auth/**",
+                                "/oauth2/**",
+                                "/login/oauth2/**",
+                                "/auth-service/**")
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
@@ -60,7 +65,6 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(user -> user.userService(oAuth2UserService))
-                        .defaultSuccessUrl("/auth/oauth2/success", true)
                         .successHandler(successHandler)
                 );
 

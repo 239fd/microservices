@@ -12,9 +12,6 @@ import java.util.Map;
 
 @Service
 public interface ProductService {
-    byte[] acceptProduct(List<ProductDTO> products, Principal principal) throws Exception;
-
-    byte[] generateBarcode(int productId) throws Exception;
 
     Map<String,byte[]> dispatchProducts(DispatchDTO dto, Principal principal) throws Exception;
 
@@ -29,4 +26,6 @@ public interface ProductService {
     List<ProductDTO> getAllStoredProducts(Principal principal);
 
     List<ProductDTO> getProductsByCellIds(List<Integer> cellIds);
+
+    byte[] acceptProductWithBarcodes(List<ProductDTO> products, Principal principal) throws Exception;
 }

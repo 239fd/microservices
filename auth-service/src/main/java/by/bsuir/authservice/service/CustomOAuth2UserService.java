@@ -2,6 +2,7 @@ package by.bsuir.authservice.service;
 
 import by.bsuir.authservice.DTO.RegisterRequest;
 import by.bsuir.authservice.feign.EmployeeClient;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -51,7 +52,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private void saveOrUpdateOAuthUser(String email, String name) {
         try {
             employeeClient.getByLogin(email.toLowerCase());
-        } catch (Exception ex) {
+        } catch (FeignException.NotFound ex) {
             RegisterRequest newUser = new RegisterRequest();
             newUser.setLogin(email.toLowerCase());
             newUser.setFirstName(name != null ? name : "OAuth2User");
@@ -62,6 +63,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             newUser.setPassword("N/A");
 
             employeeClient.createEmployee(newUser);
-        }
+        }  catch (FeignException fe) {
+        System.out.println("dsadsadsasaddsadsa");
+        throw fe;
+    }
+
     }
 }
