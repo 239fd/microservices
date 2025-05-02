@@ -27,12 +27,12 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="employee_db@localhost" uuid="e6648203-df45-49b7-b6ce-1e746879334c">
+    <data-source source="LOCAL" name="warehouse_db@localhost" uuid="19c8cc37-3e7f-49d2-bf70-e78388445ba3">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <imported>true</imported>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5436/employee_db</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5434/warehouse_db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
@@ -40,12 +40,12 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="warehouse_db@localhost" uuid="7f3fdb97-0467-49d5-b1cd-3c7f7d6a45e8">
+    <data-source source="LOCAL" name="employee_db@localhost" uuid="fbaf82ef-5e14-4059-82ac-b65031281e86">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <imported>true</imported>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5434/warehouse_db</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5436/employee_db</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />

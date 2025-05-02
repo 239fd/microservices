@@ -114,6 +114,27 @@ public class ProductController {
     public List<ProductDTO> getProductsByCellIds(@RequestBody List<Integer> cellIds) {
         return productService.getProductsByCellIds(cellIds);
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_WORKER')")
+    public ResponseEntity<ProductDTO> updateProduct(
+            @PathVariable("id") int id,
+            @RequestBody ProductDTO dto,
+            Principal principal) {
+        ProductDTO updated = productService.updateProduct(id, dto, principal);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_WORKER')")
+    public ResponseEntity<Void> deleteProduct(
+            @PathVariable("id") int id,
+            Principal principal) {
+        productService.deleteProduct(id, principal);
+        return ResponseEntity.noContent().build();
+    }
+
+
     private byte[] zipDocuments(Map<String, byte[]> docs) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ZipOutputStream zos = new ZipOutputStream(baos)) {

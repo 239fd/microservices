@@ -51,11 +51,11 @@
       "name": "Grafana"
     },
     "build": {
-      "time": 1745414057997,
+      "time": 1746122175062,
       "repo": "https://github.com/grafana/logs-drilldown",
       "branch": "main",
-      "hash": "bf54bc57f35a1c8143e1d03c750e7492bb5f9ee4",
-      "build": 2295
+      "hash": "88f7e4800e050904d9d79fb4ca230447b2968663",
+      "build": 2418
     },
     "description": "Visualize log volumes to easily detect anomalies or significant changes over time, without needing to compose LogQL queries.",
     "keywords": [
@@ -96,8 +96,8 @@
         "path": "img/table.png"
       }
     ],
-    "updated": "2025-04-23",
-    "version": "1.0.13"
+    "updated": "2025-05-01",
+    "version": "1.0.14"
   },
   "name": "Grafana Logs Drilldown",
   "preload": true,

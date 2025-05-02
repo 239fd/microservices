@@ -28,4 +28,8 @@ public interface ProductService {
     List<ProductDTO> getProductsByCellIds(List<Integer> cellIds);
 
     byte[] acceptProductWithBarcodes(List<ProductDTO> products, Principal principal) throws Exception;
+
+    void deleteProduct(int id, Principal principal);
+
+    ProductDTO updateProduct(int id, ProductDTO dto, Principal principal);
 }

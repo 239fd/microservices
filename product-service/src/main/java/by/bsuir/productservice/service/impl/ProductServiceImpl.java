@@ -21,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -443,6 +444,62 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return result;
+    }
+
+    @Override
+    @Transactional
+    public ProductDTO updateProduct(int id, ProductDTO dto, Principal principal) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found, id=" + id));
+
+        if (dto.getPrice()  > 0.0) {
+            product.setPrice(dto.getPrice());
+        }
+        if (dto.getUnit() != null) {
+            product.setUnit(dto.getUnit());
+        }
+        if (dto.getAmount()  > 0.0) {
+            product.setAmount(dto.getAmount());
+        }
+        if (dto.getHeight()  > 0.0) {
+            product.setHeight(dto.getHeight());
+        }
+        if (dto.getLength() > 0.0) {
+            product.setLength(dto.getLength());
+        }
+        if (dto.getWidth()  > 0.0) {
+            product.setWidth(dto.getWidth());
+        }
+        if (dto.getWeight()  > 0.0) {
+            product.setWeight(dto.getWeight());
+        }
+
+        Product saved = productRepository.save(product);
+        return toDto(saved);
+    }
+
+    @Override
+    @Transactional
+    public void deleteProduct(int id, Principal principal) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found, id=" + id));
+
+        productRepository.delete(product);
+    }
+
+    private ProductDTO toDto(Product p) {
+        ProductDTO dto = new ProductDTO();
+        dto.setId(p.getId());
+        dto.setName(p.getName());
+        dto.setAmount(p.getAmount());
+        dto.setPrice(p.getPrice());
+        dto.setUnit(p.getUnit());
+        dto.setHeight(p.getHeight());
+        dto.setLength(p.getLength());
+        dto.setWidth(p.getWidth());
+        dto.setWeight(p.getWeight());
+        dto.setBestBeforeDate(p.getBestBeforeDate() != null ? LocalDate.parse(p.getBestBeforeDate().toString()) : null);
+        return dto;
     }
 
     @Override
