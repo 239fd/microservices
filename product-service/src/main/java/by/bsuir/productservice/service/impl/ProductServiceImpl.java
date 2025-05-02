@@ -478,11 +478,11 @@ public class ProductServiceImpl implements ProductService {
         return toDto(saved);
     }
 
-    @Override
-    @Transactional
     public void deleteProduct(int id, Principal principal) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found, id=" + id));
+
+        cellHasProductRepository.deleteByProductId(id);
 
         productRepository.delete(product);
     }

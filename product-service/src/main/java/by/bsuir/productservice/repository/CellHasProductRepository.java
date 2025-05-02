@@ -1,7 +1,9 @@
 package by.bsuir.productservice.repository;
 
 import by.bsuir.productservice.entity.CellHasProduct;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,5 +19,9 @@ public interface CellHasProductRepository extends JpaRepository<CellHasProduct, 
 
     List<CellHasProduct> findAllByIdCellIdIn(List<Integer> cellIds);
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM CellHasProduct chp WHERE chp.id.productId = :productId")
+    void deleteByProductId(int productId);
 }
 
