@@ -202,24 +202,29 @@ public class ProductServiceImpl implements ProductService {
                 getFullName(employee)
         );
 
-        byte[] ttnPdf = pdfService.generateTTN(
-                dto,
-                dispatchedDtos,
-                employee,
-                warehouse
-        );
+        String docType = dto.getDocumentType() == null
+                ? ""
+                : dto.getDocumentType().trim().toUpperCase();
 
-        byte[] tnPdf = pdfService.generateTN(
-                dto,
-                dispatchedDtos,
-                employee,
-                warehouse
-        );
+        byte[] secondPdf;
+        String fileName;
+
+        switch (docType) {
+            case "TTN" -> {
+                secondPdf = pdfService.generateTTN(dto, dispatchedDtos, employee, warehouse);
+                fileName  = "TTN.pdf";
+            }
+            case "TN"  -> {
+                secondPdf = pdfService.generateTN(dto, dispatchedDtos, employee, warehouse);
+                fileName  = "TN.pdf";
+            }
+            default -> throw new AppException(
+                    "documentType must be \"TTN\" or \"TN\"", HttpStatus.BAD_REQUEST);
+        }
 
         Map<String, byte[]> result = new LinkedHashMap<>();
         result.put("dispatch_order.pdf", orderPdf);
-        result.put("TTN.pdf", ttnPdf);
-        result.put("TN.pdf", tnPdf);
+        result.put(fileName, secondPdf);
         return result;
     }
 

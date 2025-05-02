@@ -38,7 +38,6 @@ public class ProductController {
                 .body(zip);
     }
 
-
     @PostMapping("/dispatch")
     @PreAuthorize("hasAuthority('ROLE_WORKER')")
     public ResponseEntity<byte[]> dispatchProducts(
